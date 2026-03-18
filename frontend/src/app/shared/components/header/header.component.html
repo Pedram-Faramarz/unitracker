@@ -1,0 +1,13 @@
+<header class="app-header">
+  <a routerLink="/dashboard" class="header-logo">Uni<span>Track</span></a>
+
+  <nav class="header-nav">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+    <a routerLink="/principles" routerLinkActive="active" class="nav-link">Principles</a>
+  </nav>
+
+  <div class="header-user">
+    <span class="user-name">{{ auth.user()?.full_name || auth.user()?.email }}</span>
+    <button class="btn btn-ghost btn-sm" (click)="logout()">Sign out</button>
+  </div>
+</header>

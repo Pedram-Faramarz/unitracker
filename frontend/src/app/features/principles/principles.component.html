@@ -1,0 +1,86 @@
+<app-header />
+
+<div class="page-content">
+  <div class="welcome-row">
+    <div>
+      <h1 class="page-title">Principles</h1>
+      <p class="page-sub">{{ principles().length }} subject{{ principles().length !== 1 ? 's' : '' }} tracked</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Principle</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <input class="search-input" [(ngModel)]="search"
+           (ngModelChange)="load()" placeholder="🔍 Search principles…">
+    <label class="toggle-label">
+      <input type="checkbox" [(ngModel)]="filterArchived" (ngModelChange)="load()">
+      Show archived
+    </label>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="skeleton-grid">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading()" class="principles-grid">
+    <div class="principle-card" *ngFor="let p of principles()">
+      <div class="card-strip" [style.background]="p.color"></div>
+      <div class="card-body">
+
+        <div class="card-top">
+          <div class="card-info">
+            <h3 class="card-name">{{ p.name }}</h3>
+            <div>
+              <span class="semester-tag" *ngIf="p.semester">{{ p.semester }}</span>
+              <span class="archived-tag" *ngIf="p.is_archived">Archived</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn" title="Edit" (click)="openEdit(p, $event)">✎</button>
+            <button class="icon-btn" title="{{ p.is_archived ? 'Unarchive' : 'Archive' }}"
+                    (click)="archive(p, $event)">
+              {{ p.is_archived ? '📂' : '🗂️' }}
+            </button>
+            <button class="icon-btn danger" title="Delete" (click)="delete(p, $event)">✕</button>
+          </div>
+        </div>
+
+        <p class="card-desc" *ngIf="p.description">{{ p.description }}</p>
+
+        <div class="card-progress">
+          <div class="mini-bar-wrap">
+            <div class="mini-bar"
+                 [style.width.%]="p.progress_percentage"
+                 [style.background]="getProgressColor(p.progress_percentage)">
+            </div>
+          </div>
+          <span class="pct-label" [style.color]="getProgressColor(p.progress_percentage)">
+            {{ p.progress_percentage }}%
+          </span>
+        </div>
+
+        <div class="card-footer">
+          <span class="meta-chip">{{ p.completed_task_count }}/{{ p.task_count }} tasks done</span>
+          <a [routerLink]="['/principles', p.id]" class="link-btn">View tasks →</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div *ngIf="!principles().length" class="empty-state-full">
+      <div class="empty-icon">📋</div>
+      <h3>{{ search ? 'No results found' : 'No principles yet' }}</h3>
+      <p>{{ search ? 'Try a different search term' : 'Click "+ Add Principle" to get started' }}</p>
+    </div>
+  </div>
+</div>
+
+<app-principle-modal
+  *ngIf="showModal()"
+  [principle]="editingPrinciple()"
+  (saved)="onSaved()"
+  (cancelled)="onCancelled()">
+</app-principle-modal>

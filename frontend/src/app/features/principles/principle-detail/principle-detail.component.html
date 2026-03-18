@@ -1,0 +1,123 @@
+<app-header />
+
+<div class="page-content" *ngIf="!loading(); else loadingTpl">
+  <div *ngIf="principle() as p">
+
+    <div class="detail-header">
+      <a routerLink="/principles" class="back-link">← Principles</a>
+      <div class="detail-title-row">
+        <div class="color-dot" [style.background]="p.color"></div>
+        <h1 class="page-title">{{ p.name }}</h1>
+        <span class="semester-tag" *ngIf="p.semester">{{ p.semester }}</span>
+        <span class="archived-tag" *ngIf="p.is_archived">Archived</span>
+      </div>
+      <p class="page-sub" *ngIf="p.description">{{ p.description }}</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="detail-progress-card">
+      <div class="dp-label">Progress</div>
+      <div class="dp-row">
+        <div class="big-bar-wrap">
+          <div class="big-bar"
+               [style.width.%]="p.progress_percentage"
+               [style.background]="getProgressColor(p.progress_percentage)">
+          </div>
+        </div>
+        <div class="dp-pct" [style.color]="getProgressColor(p.progress_percentage)">
+          {{ p.progress_percentage }}%
+        </div>
+      </div>
+      <div class="dp-meta">
+        {{ doneCount }} done · {{ pendingCount }} pending · {{ p.task_count }} total
+      </div>
+    </div>
+
+    <!-- Add Task -->
+    <div class="add-task-card" *ngIf="!p.is_archived">
+      <h3 class="section-title">Add Task</h3>
+      <div class="add-task-row">
+        <input class="form-input" [(ngModel)]="newTaskText"
+               placeholder="Describe the task…"
+               (keydown.enter)="addTask()"
+               [disabled]="saving()">
+        <select class="form-input priority-select" [(ngModel)]="newTaskPriority">
+          <option *ngFor="let pr of priorities" [value]="pr">{{ pr | titlecase }}</option>
+        </select>
+        <input class="form-input due-input" type="date" [(ngModel)]="newTaskDueDate" title="Due date (optional)">
+        <button class="btn btn-primary" (click)="addTask()" [disabled]="saving() || !newTaskText.trim()">
+          {{ saving() ? '…' : '+ Add' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <button class="filter-btn" [class.active]="filterDone === null" (click)="filterDone = null">
+        All ({{ p.task_count }})
+      </button>
+      <button class="filter-btn" [class.active]="filterDone === false" (click)="filterDone = false">
+        Pending ({{ pendingCount }})
+      </button>
+      <button class="filter-btn" [class.active]="filterDone === true" (click)="filterDone = true">
+        Done ({{ doneCount }})
+      </button>
+    </div>
+
+    <!-- Task list -->
+    <div class="task-list">
+      <div class="task-row" *ngFor="let t of filteredTasks" [class.task-done]="t.is_done">
+
+        <input type="checkbox" class="task-check"
+               [checked]="t.is_done"
+               (change)="toggle(t)"
+               [disabled]="p.is_archived">
+
+        <div class="task-body">
+          <ng-container *ngIf="editingTaskId() !== t.id; else editTpl">
+            <span class="task-text" (dblclick)="!p.is_archived && startEdit(t)"
+                  [title]="p.is_archived ? '' : 'Double-click to edit'">{{ t.text }}</span>
+          </ng-container>
+          <ng-template #editTpl>
+            <input class="task-edit-input"
+                   [(ngModel)]="editingTaskText"
+                   (blur)="saveEdit(t)"
+                   (keydown.enter)="saveEdit(t)"
+                   (keydown.escape)="cancelEdit()"
+                   autofocus>
+          </ng-template>
+
+          <div class="task-meta">
+            <span [class]="priorityClass(t.priority)">{{ t.priority }}</span>
+            <span *ngIf="t.due_date" class="due-chip">📅 {{ t.due_date }}</span>
+            <span *ngIf="t.done_at" class="done-chip">✓ {{ t.done_at | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <select class="prio-select"
+                [value]="t.priority"
+                (change)="updatePriority(t, $any($event.target).value)"
+                [disabled]="p.is_archived">
+          <option *ngFor="let pr of priorities" [value]="pr">{{ pr | titlecase }}</option>
+        </select>
+
+        <div class="task-actions" *ngIf="!p.is_archived">
+          <button class="icon-btn" title="Edit" (click)="startEdit(t)">✎</button>
+          <button class="icon-btn danger" title="Delete" (click)="deleteTask(t)">✕</button>
+        </div>
+      </div>
+
+      <div *ngIf="!filteredTasks.length" class="empty-state-full">
+        <p>{{ filterDone === null ? 'No tasks yet — add one above!' : 'No tasks in this filter.' }}</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="page-content">
+    <div class="skeleton-card" style="height:200px;margin-bottom:16px"></div>
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]" style="height:60px;margin-bottom:8px"></div>
+  </div>
+</ng-template>

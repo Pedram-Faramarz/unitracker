@@ -1,0 +1,54 @@
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">Uni<span>Track</span></div>
+    <h2>Create account</h2>
+    <p class="auth-sub">Start tracking your academic journey</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" formControlName="full_name" placeholder="Your name">
+        <span class="form-error" *ngIf="form.get('full_name')?.touched && form.get('full_name')?.invalid">
+          Name is required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" formControlName="email" placeholder="you@university.edu">
+        <span class="form-error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+          Enter a valid email
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">University <span class="optional">(optional)</span></label>
+        <input class="form-input" type="text" formControlName="university" placeholder="e.g. MIT, Harvard...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" formControlName="password" placeholder="Min 8 characters">
+        <span class="form-error" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+          At least 8 characters required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" type="password" formControlName="password2" placeholder="Repeat password">
+        <span class="form-error" *ngIf="form.get('password2')?.touched && form.errors?.['mismatch']">
+          Passwords do not match
+        </span>
+      </div>
+
+      <button class="btn btn-primary btn-full" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Creating account…' : 'Create Account' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account? <a routerLink="/auth/login">Sign in</a>
+    </p>
+  </div>
+</div>
