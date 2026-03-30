@@ -55,7 +55,15 @@
             <button class="icon-btn danger" title="Delete" (click)="delete(p, $event)">✕</button>
           </div>
         </div>
-
+        <!-- Add this between the filter-bar div and the grid div -->
+    <div class="search-bar-wrap">
+      <input
+        class="search-input"
+        #searchInput
+        placeholder="🔍 Search principles…"
+        (keydown.enter)="search = searchInput.value; load()">
+      <button class="clear-btn" *ngIf="search" (click)="search = ''; searchInput.value = ''; load()">✕</button>
+    </div>
         <p class="card-desc" *ngIf="p.description">{{ p.description }}</p>
 
         <div class="card-progress">
