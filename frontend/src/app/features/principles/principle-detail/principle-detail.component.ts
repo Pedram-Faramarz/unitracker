@@ -26,7 +26,7 @@ export class PrincipleDetailComponent implements OnInit {
   editingTaskText = '';
   filterDone: boolean | null = null;
   priorities = ['low', 'medium', 'high'];
-
+  search = '';
   constructor(private tracker: TrackerService, private toast: ToastService) {}
 
   ngOnInit() { this.load(); }
@@ -39,10 +39,12 @@ export class PrincipleDetailComponent implements OnInit {
   }
 
   get filteredTasks(): Task[] {
-    const tasks = this.principle()?.tasks || [];
-    if (this.filterDone === null) return tasks;
-    return tasks.filter(t => t.is_done === this.filterDone);
-  }
+  const tasks = this.principle()?.tasks || [];
+  const byDone = this.filterDone === null ? tasks : tasks.filter(t => t.is_done === this.filterDone);
+  const q = this.search.trim().toLowerCase();
+  return q ? byDone.filter(t => t.text.toLowerCase().includes(q)) : byDone;
+}
+
 
   get pendingCount(): number {
     return (this.principle()?.tasks || []).filter(t => !t.is_done).length;
@@ -133,4 +135,5 @@ export class PrincipleDetailComponent implements OnInit {
   priorityClass(p: string): string {
     return ({ low: 'priority-low', medium: 'priority-med', high: 'priority-high' } as any)[p] || '';
   }
+
 }
